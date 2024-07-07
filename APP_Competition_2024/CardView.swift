@@ -1,0 +1,143 @@
+//
+//  CardView.swift
+//  APP_Competition_2024
+//
+//  Created by STUDIO A on 2024/7/7.
+//
+
+import UIKit
+
+
+protocol SwipeCardsDataSource {
+    func numberOfCardsToShow() -> Int
+    func card(at index: Int) -> CardView
+    func emptyView() -> UIView?
+    
+}
+
+protocol SwipeCardsDelegate {
+    func swipeDidEnd(on view: CardView)
+}
+
+class CardView : UIView{
+   
+    //MARK: - Properties
+    var swipeView : UIView!
+    var delegate : SwipeCardsDelegate?
+
+    var dataSource : DataModel? {
+        didSet {
+            swipeView.backgroundColor = dataSource?.bgColor
+        }
+    }
+
+    
+    //MARK: - Init
+    init(index: Int) {
+        super.init(frame: .zero)
+        
+        configureSwipeView(index: index)
+        addPanGestureOnCards()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    //MARK: - Configuration
+    
+    func configureSwipeView(index: Int) {
+        swipeView = UIView()
+        swipeView.layer.cornerRadius = 15
+        swipeView.clipsToBounds = true
+        addSubview(swipeView)
+        
+        swipeView.translatesAutoresizingMaskIntoConstraints = false
+        swipeView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        swipeView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        swipeView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        swipeView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        
+        let image = UIImage(named: "img_0" + "\(index)")
+        let imageView = UIImageView(image: image!)
+        imageView.frame = CGRect(x: 100, y: 80, width: 170, height: 170)
+        addSubview(imageView)
+    }
+
+    
+    
+    func addPanGestureOnCards() {
+        self.isUserInteractionEnabled = true
+        addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture)))
+    }
+    
+    func leftSwipeClicked(stackContainerView: StackContainerView)
+    {
+        let finishPoint = CGPoint(x: center.x - frame.size.width * 2, y: center.y)
+        UIView.animate(withDuration: 0.4, animations: {() -> Void in
+
+            self.center = finishPoint
+            self.transform = CGAffineTransform(rotationAngle: -1)
+
+        }, completion: {(_ complete: Bool) -> Void in
+            stackContainerView.swipeDidEnd(on: self)
+            self.removeFromSuperview()
+
+        })
+    }
+
+    func rightSwipeClicked(stackContainerView: StackContainerView)
+    {
+        let finishPoint = CGPoint(x: center.x + frame.size.width * 2, y: center.y)
+        UIView.animate(withDuration: 0.4, animations: {() -> Void in
+
+            self.center = finishPoint
+            self.transform = CGAffineTransform(rotationAngle: 1)
+
+        }, completion: {(_ complete: Bool) -> Void in
+            stackContainerView.swipeDidEnd(on: self)
+            self.removeFromSuperview()
+
+        })
+    }
+    
+    //MARK: - Handlers
+    @objc func handlePanGesture(sender: UIPanGestureRecognizer){
+        let card = sender.view as! CardView
+        let point = sender.translation(in: self)
+        let centerOfParentContainer = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
+        card.center = CGPoint(x: centerOfParentContainer.x + point.x, y: centerOfParentContainer.y + point.y)
+        
+        switch sender.state {
+        case .ended:
+            if (card.center.x) > 400 {
+                delegate?.swipeDidEnd(on: card)
+                UIView.animate(withDuration: 0.2) {
+                    card.center = CGPoint(x: centerOfParentContainer.x + point.x + 200, y: centerOfParentContainer.y + point.y + 75)
+                    card.alpha = 0
+                    self.layoutIfNeeded()
+                }
+                return
+            }else if card.center.x < -65 {
+                delegate?.swipeDidEnd(on: card)
+                UIView.animate(withDuration: 0.2) {
+                    card.center = CGPoint(x: centerOfParentContainer.x + point.x - 200, y: centerOfParentContainer.y + point.y + 75)
+                    card.alpha = 0
+                    self.layoutIfNeeded()
+                }
+                return
+            }
+            UIView.animate(withDuration: 0.2) {
+                card.transform = .identity
+                card.center = CGPoint(x: self.frame.width / 2, y: self.frame.height / 2)
+                self.layoutIfNeeded()
+            }
+        case .changed:
+            let rotation = tan(point.x / (self.frame.width * 2.0))
+            card.transform = CGAffineTransform(rotationAngle: rotation)
+            
+        default:
+            break
+        }
+    }
+}
