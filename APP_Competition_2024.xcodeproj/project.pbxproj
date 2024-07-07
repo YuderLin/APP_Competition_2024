@@ -62,11 +62,11 @@
 		3DA018282C3AC7C500FEB7D7 /* APP_Competition_2024 */ = {
 			isa = PBXGroup;
 			children = (
+				3DA0182B2C3AC7C500FEB7D7 /* SceneDelegate.swift */,
+				3DA018292C3AC7C500FEB7D7 /* AppDelegate.swift */,
 				3DA0183F2C3AC89C00FEB7D7 /* CardView.swift */,
 				3DA018412C3AC8B800FEB7D7 /* StackContainerView.swift */,
 				3DA0183D2C3AC87F00FEB7D7 /* CameraView.swift */,
-				3DA018292C3AC7C500FEB7D7 /* AppDelegate.swift */,
-				3DA0182B2C3AC7C500FEB7D7 /* SceneDelegate.swift */,
 				3DA0182D2C3AC7C500FEB7D7 /* ViewController.swift */,
 				3DA0182F2C3AC7C500FEB7D7 /* Main.storyboard */,
 				3DA018322C3AC7C700FEB7D7 /* Assets.xcassets */,
