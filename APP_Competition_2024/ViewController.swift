@@ -15,6 +15,38 @@ protocol HandSwiperDelegate {
 }
 
 class ViewController: UIViewController, HandSwiperDelegate {
+    
+    
+    // MARK: - Music
+    var player: AVAudioPlayer?
+
+        func MusicDidLoad() {
+            // 配置音頻
+            let audioSession = AVAudioSession.sharedInstance()
+            do {
+                try audioSession.setCategory(.playback, mode: .default, options: [])
+                try audioSession.setActive(true)
+            } catch {
+                print("Failed to set up audio session: \(error)")
+            }
+            
+            // 初始化播放器
+            if let urlone = Bundle.main.url(forResource: "MusicOne", withExtension: "mp3") {
+                do {
+                    player = try AVAudioPlayer(contentsOf: urlone)
+                    player?.numberOfLoops = -1
+                } catch {
+                    print("Failed to initialize AVAudioPlayer: \(error)")
+                }
+            } else {
+                print("Audio file not found")
+            }
+            
+            // 播放音樂
+            player?.play()
+        }
+    
+    // MARK: - Thumb
     func thumbsDown() {
         if let firstView = stackContainer.subviews.last as? CardView {
             firstView.leftSwipeClicked(stackContainerView: stackContainer)
@@ -63,6 +95,10 @@ class ViewController: UIViewController, HandSwiperDelegate {
 
         // 確認導航欄不隱藏
         self.navigationController?.setNavigationBarHidden(false, animated: false)
+        
+        // 播放音樂
+        MusicDidLoad()
+
     }
     func configureNavigationBarButtonItem() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Reset", style: .plain, target: self, action: #selector(resetTapped))
@@ -145,6 +181,11 @@ class ViewController: UIViewController, HandSwiperDelegate {
     // MARK: - Handlers
     @objc func resetTapped() {
         stackContainer.reloadData()
+        
+        // 重新播放音樂
+        player?.stop()
+        player?.currentTime = 0
+        player?.play()
     }
     
     override func viewDidAppear(_ animated: Bool) {
